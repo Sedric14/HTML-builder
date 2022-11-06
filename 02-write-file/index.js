@@ -6,7 +6,6 @@ fs.writeFile("02-write-file/hello.txt", "", function (error) {
 
 const readline = require("readline");
 const { stdin: input, stdout: output } = require("process");
-// const process = require("process");
 
 const rl = readline.createInterface({ input, output });
 
