@@ -85,46 +85,16 @@ const write = function () {
 
 fs.rm("06-build-page/project-dist/style.css", (err) => {
   if (err) throw err;
-  setTimeout(write, 100);
+  write();
 });
 
 let from = "06-build-page/assets";
 let to = "06-build-page/project-dist/assets";
 
-function deleteFiles(dir) {
-  fs.readdir(dir, "utf8", (err, files) => {
+const copyFiles = function (from, to) {
+  fs.readdir(from, "utf8", (err, files) => {
     if (err) throw err;
     files.forEach((element) => {
-      fs.stat(path.join(dir, element), (err, stats) => {
-        if (err) throw err;
-        if (stats.isDirectory()) {
-          fs.readdir(`${dir}/${element}`, function (err, data) {
-            if (err) throw err;
-            if (data.length == 0) {
-              fs.rmdir(`${dir}/${element}`, (err) => {
-                if (err) throw err;
-              });
-            } else {
-              deleteFiles(`${dir}/${element}`);
-            }
-          });
-        } else {
-          fs.rm(`${dir}/${element}`, (err) => {
-            if (err) throw err;
-          });
-        }
-      });
-    });
-    setTimeout(() => {
-      copyFiles(from, to);
-    }, 100);
-  });
-}
-
-const copyFiles = function (from, to) {
-  fs.readdir(from, "utf8", (err, files2) => {
-    if (err) throw err;
-    files2.forEach((element) => {
       fs.stat(path.join(from, element), (err, stats) => {
         if (err) throw err;
         if (stats.isDirectory()) {
@@ -136,10 +106,20 @@ const copyFiles = function (from, to) {
           fs.copyFile(`${from}/${element}`, `${to}/${element}`, (err) => {
             if (err) throw err;
           });
+          fs.readdir(to, "utf8", (err, files2) => {
+            if (err) throw err;
+            files2.forEach((element) => {
+              if (!files.includes(element)) {
+                fs.rm(`${to}/${element}`, (err) => {
+                  if (err) throw err;
+                });
+              }
+            });
+          });
         }
       });
     });
   });
 };
 
-deleteFiles("06-build-page/project-dist/assets");
+copyFiles(from, to);
